@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-	<h1>Hello, {{ user.username }}!</h1>
-	{% for point in points %}
-	<div><p>Point: <b>{{point.elevation}}</b></p></div>
+	<h1>Hello, {{ current_user.username }}!</h1>
+	{% for sensor in sensors %}
+	<a href="{{ url_for('sensor', id=sensor.id) }}" >
+        <div>
+            <p>Sensor {{ sensor.id }}: <b>{{ sensor.points }}</b></p>
+        </div>
+    </a>
 	{% endfor %}
 {% endblock %}

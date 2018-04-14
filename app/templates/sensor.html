@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Sensor: {{ sensor.id }}</h1>
+    <hr>
+    {% for point in points %}
+    <p>
+        {{ point.alt }} at: {{ point.lat }}, {{ point.lon }}
+    </p>
+    {% endfor %}
+{% endblock %}
