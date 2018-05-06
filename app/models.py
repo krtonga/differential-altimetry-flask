@@ -61,6 +61,31 @@ class Reading(db.Model):
 				'uncal_temprature_sd': self.uncal_temperature_sd,
 				'sample_count':self.sample_count}
 
+	def csvify(self):
+		return {self.id,self.sensor_id,
+				self.calibration,self.time,self.duration,
+				self.lat,self.lon,self.lat_lon_sd,
+				self.uncal_pressure,self.uncal_pressure_sd,
+				self.uncal_temperature,self.uncal_temperature_sd,
+				self.sample_count}
+
+	@staticmethod
+	def csv_headers(self):
+		return {'id','sensor_id',
+				'calibration','time','duration',
+				'lat','lon','lat_lon_sd',
+				'uncal_pressure','uncal_pressure_sd',
+				'uncal_temprature','uncal_temprature_sd',
+				'sample_count'}
+
+	@staticmethod
+	def get_all():
+		return Reading.query.all()
+
+	@staticmethod
+	def get(sensorId, count):
+		return Reading.query.filter_by(sensor_id=sensorId).order_by(Reading.time.desc()).limit(count).all()
+
 
 class Sensor(db.Model):
 	sensor_id = db.Column(db.String(64), primary_key=True)
@@ -90,9 +115,20 @@ class Sensor(db.Model):
 			return {'sensor_id':self.sensor_id,
 					'fixed':self.fixed}
 
+	def csvify(self):
+		return {self.sensor_id, self.fixed, self.lat, self.lon, self.alt}
+
+	@staticmethod
+	def csv_headers(self):
+		return {'sensor_id', 'fixed', 'latitude', 'longitude', 'elevation'}
+
 	@staticmethod
 	def get_all():
 		return Sensor.query.all()
+
+	@staticmethod
+	def get_all_ids():
+		return db.session.query(Sensor.sensor_id).distinct().all()
 
 	@staticmethod
 	def get(sensorId):

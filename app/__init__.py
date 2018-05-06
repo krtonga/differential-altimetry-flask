@@ -13,18 +13,18 @@ login = LoginManager(app)
 login.login_view = 'login'
 
 # write logs to a file
-if not app.debug:
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-    file_handler = RotatingFileHandler('logs/diffaltimetry.log', maxBytes=10240, backupCount=10)
-    file_handler.setFormatter(
-        logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
-    )
-    file_handler.setLevel(logging.ERROR)
-
-    app.logger.addHandler(file_handler)
-    app.logger.setLevel(logging.ERROR)
-    app.logger.info('DiffAltimetry startup')
+# if not app.debug:
+    # if not os.path.exists('logs'):
+    #     os.mkdir('logs')
+    # file_handler = RotatingFileHandler('logs/diffaltimetry.log', maxBytes=10240, backupCount=10)
+    # file_handler.setFormatter(
+    #     logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+    # )
+    # file_handler.setLevel(logging.ERROR)
+    #
+    # app.logger.addHandler(file_handler)
+    # app.logger.setLevel(logging.ERROR)
+    # app.logger.info('DiffAltimetry startup')
 
 # must come at end as workaround for circular inputs
 from app import routes, models

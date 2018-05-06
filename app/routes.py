@@ -1,7 +1,7 @@
 import json, datetime
-from flask import render_template, flash, redirect, url_for, request, jsonify
 from app import app, db
 from app.forms import LoginForm, RegistrationForm
+from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app.models import User, Sensor, Reading
@@ -45,7 +45,7 @@ def register():
 	if form.validate_on_submit():
 		user = User(username=form.username.data, email=form.email.data)
 		user.set_password(form.password.data)
-		db.session.add(user)
+		db.session.append(user)
 		db.session.commit()
 		flash('Congrats! You have registered!')
 		return redirect(url_for('login'))
@@ -98,88 +98,83 @@ def sensors():
 
 @app.route('/readings', methods=['GET','POST'])
 def readings():
+
 	if request.method == "POST":
 		# read request
 		jsonReq = json.loads(request.data)
 		if len(jsonReq) > 0:
-			# ensure that sensor exists for these readings
+			# ensure that sensor exists for these readings (assume one sensor/post)
 			sensor_id = jsonReq[0].get('sensor_id')
 			readingSensor = Sensor.get(sensor_id)
 			if readingSensor is None:
 				readingSensor = Sensor(sensor_id=sensor_id, fixed=False)
 				readingSensor.save()
 			# create readings from json
-			for item in jsonReq:
-				sensor_id = item.get('sensor_id')
-				calibration = item.get('calibration')
-				time = item.get('time')
-				duration = item.get('duration')
-				lat = item.get('lat')
-				lon = item.get('lon')
-				lat_lon_sd = item.get('lat_lon_sd')
-				uncal_pressure = item.get('uncal_pressure')
-				uncal_pressure_sd = item.get('uncal_pressure_sd')
-				uncal_temperature = item.get('uncal_temperature')
-				uncal_temperature_sd = item.get('uncal_temperature_sd')
-				sample_count = item.get('sample_count')
-
-				reading = Reading(sensor_id=sensor_id,
-								  calibration=calibration,
-								  time=datetime.datetime.fromtimestamp(time),
-								  duration=duration,
-								  lat=lat,
-								  lon=lon,
-								  lat_lon_sd=lat_lon_sd,
-								  uncal_pressure = uncal_pressure,
-								  uncal_pressure_sd = uncal_pressure_sd,
-								  uncal_temperature = uncal_temperature,
-								  uncal_temperature_sd = uncal_temperature_sd,
-								  sample_count = sample_count)
+			for jsonItem in jsonReq:
+				reading = Reading(sensor_id=jsonItem.get('sensor_id'),
+								  calibration=jsonItem.get('calibration'),
+								  time=datetime.datetime.fromtimestamp(jsonItem.get('time')),
+								  duration=jsonItem.get('duration'),
+								  lat=jsonItem.get('lat'),
+								  lon=jsonItem.get('lon'),
+								  lat_lon_sd=jsonItem.get('lat_lon_sd'),
+								  uncal_pressure=jsonItem.get('uncal_pressure'),
+								  uncal_pressure_sd=jsonItem.get('uncal_pressure_sd'),
+								  uncal_temperature=jsonItem.get('uncal_temperature'),
+								  uncal_temperature_sd=jsonItem.get('uncal_temperature_sd'),
+								  sample_count=jsonItem.get('sample_count'))
 				reading.save()
 		# generate server response
 		response = jsonify(jsonReq)
 		response.status_code = 201  # Created
+		return response
 
+	# GET
 	else:
 		sid = request.args.get('sensor_id', '', type=str)
-		if sid != '':
-			count = request.args.get('count', -1, type=int)
-			if count != -1:
-				sensor = Sensor.get(sid)
-				if sensor is None:
+		count = request.args.get('count', -1, type=int)
+
+		# check if query contains count
+		if count != -1:
+			# query does not specify sensor id
+			if sid == '':
+				sensor_ids = Sensor.get_all_ids()
+				filtered = []
+				for id in sensor_ids:
+					oneSensorsReadings = Reading.get(id.sensor_id, count)
+					for r in oneSensorsReadings:
+						filtered.append(r)
+				response = jsonify([r.jsonify() for r in filtered])
+				response.status_code = 200  # Ok
+				return response
+
+			# query contains sensor id & count
+			else:
+				# return count readings from sensor with given sensor_id
+				filtered = Reading.get(sid, count)
+				if not filtered:
 					response = jsonify({})
 					response.status_code = 204  # No Content
 					return response
 				else:
-					filtered = sensor.readings.all()
 					response = jsonify([r.jsonify() for r in filtered])
 					response.status_code = 200  # Ok
 					return response
+				pass
 
-			else:
-				start = request.args.get('start_time', -1, type=int)
-				end = request.args.get('end_time', -1, type=int)
-				if (start == -1) or (end == -1):
-					response = jsonify({'error': 'Only the following queries are supported: count, sensor_id & count, sensor_id & start_time & end_time'})
-					response.status_code = 400  # Bad Request
-					return response
-				# else:
-				# # TODO
-			response = jsonify({'error': 'Only the following queries are supported: count, sensor_id & count, sensor_id & start_time & end_time'})
-			response.status_code = 400  # Bad Request
-		else:
-			response = jsonify({'error': 'Only POST and GET allowed'})
-			response.status_code = 405  # Method Not Allowed
+		# check if query contains sensor id, and start and end times
+		# elif sid != '':
+		# 	start = request.args.get('start_time', -1, type=int)
+		# 	end = request.args.get('end_time', -1, type=int)
+		# 	if (start != -1) and (end != -1):
 
+		# else:
+
+
+	# parameters are missing
+	response = jsonify({'error': 'Only the following queries are supported: count, sensor_id & count, sensor_id & start_time & end_time'})
+	response.status_code = 400  # Bad Request
 	return response
-	# elif request.method == "GET":
-		# sensor_id
-			# count
-		# count
-	# else:
-	# 	response = jsonify({'error': 'Only POST and GET allowed'})
-	# 	response.status_code = 405  # Method Not Allowed
-	# return response
 
 
 # @app.route('/points', methods=['GET', 'POST'])
