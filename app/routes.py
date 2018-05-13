@@ -68,18 +68,10 @@ def sensors():
 	if request.method == "POST":
 		# read info from request
 		jsonReq = json.loads(request.data)
-		sensor_id = str(jsonReq.get('sensor_id',''))
-		fixed = jsonReq.get('fixed', False)
-		lat = jsonReq.get('lat')
-		lon = jsonReq.get('lon')
-		alt = jsonReq.get('alt')
+		savedSensor = Sensor.saveJson(jsonReq)
 
-		# verify required fields
-		if (sensor_id and fixed and lat and lon and alt) or (sensor_id and not fixed):
-			# create sensor, save & return
-			sensor = Sensor(sensor_id=sensor_id, fixed=fixed, lat=lat, lon=lon, alt=alt)
-			sensor.save()
-			response = jsonify(sensor.jsonify())
+		if savedSensor:
+			response = jsonify(savedSensor.jsonify())
 			response.status_code = 201 # Created
 		else:
 			response = jsonify({'error':'Sensor missing required fields. '
@@ -88,6 +80,7 @@ def sensors():
 								})
 			response.status_code = 400 # Bad Request
 
+	# GET
 	else:
 		sensors = Sensor.get_all()
 		response = jsonify([s.jsonify() for s in sensors])

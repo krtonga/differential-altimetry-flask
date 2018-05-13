@@ -134,6 +134,20 @@ class Sensor(db.Model):
 	def get(sensorId):
 		return Sensor.query.filter_by(sensor_id=sensorId).first()
 
+	@staticmethod
+	def saveJson(jsonReq):
+		sensor_id = str(jsonReq.get('sensor_id', ''))
+		fixed = jsonReq.get('fixed', False)
+		lat = jsonReq.get('lat')
+		lon = jsonReq.get('lon')
+		alt = jsonReq.get('alt')
+
+		# verify required fields
+		if (sensor_id and fixed and lat and lon and alt) or (sensor_id and not fixed):
+			# create sensor, save & return
+			sensor = Sensor(sensor_id=sensor_id, fixed=fixed, lat=lat, lon=lon, alt=alt)
+			sensor.save()
+			return sensor
 
 class Point(db.Model):
 	id = db.Column(db.String(64), primary_key=True)

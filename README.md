@@ -12,6 +12,9 @@ This is a basic flask server. To run locally, use the following commands:
  pip install flask
  export FLASK_APP=diffaltimetry.py
  
+ #setup an empty db
+ python db_create.py
+ 
  #run on localhost
  flask run
  ```
