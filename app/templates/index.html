@@ -3,9 +3,9 @@
 {% block content %}
 	<h1>Hello, {{ current_user.username }}!</h1>
 	{% for sensor in sensors %}
-	<a href="{{ url_for('sensor', id=sensor.id) }}" >
+	<a href="{{ url_for('sensor', id=sensor.sensor_id) }}" >
         <div>
-            <p>Sensor {{ sensor.id }}: <b>{{ sensor.points }}</b></p>
+            <p>Sensor {{ sensor.sensor_id }}: <b>{{ sensor.points.all() }}</b></p>
         </div>
     </a>
 	{% endfor %}
