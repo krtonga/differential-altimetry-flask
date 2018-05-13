@@ -12,6 +12,10 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 
+# import of bps must come after app and db are defined
+from app.auth import auth_bp
+app.register_blueprint(auth_bp)
+
 # write logs to a file
 # if not app.debug:
     # if not os.path.exists('logs'):
