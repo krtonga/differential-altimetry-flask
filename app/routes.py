@@ -134,11 +134,14 @@ def readings():
 				return createReadingsResponse(filtered)
 
 		# check if query contains sensor id, and start and end times
-		elif sid != '':
+		else:
 			start = request.args.get('start_time', -1, type=int)
 			end = request.args.get('end_time', -1, type=int)
 			if (start != -1) and (end != -1):
-				filtered = Reading.get_sensor_range(sid, start, end)
+				if sid != '':
+					filtered = Reading.get_sensor_range(sid, start, end)
+				else:
+					filtered = Reading.get_range(start, end)
 				return createReadingsResponse(filtered)
 
 

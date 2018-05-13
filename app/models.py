@@ -105,6 +105,11 @@ class Reading(db.Model):
 		return Reading.query.filter_by(sensor_id=sensorId).order_by(Reading.time.desc()).limit(count).all()
 
 	@staticmethod
+	def get_range(start, end):
+		return Reading.query.filter(Reading.time.between(datetime.datetime.fromtimestamp(start),
+														 datetime.datetime.fromtimestamp(end)))
+
+	@staticmethod
 	def get_sensor_range(sensorId, start, end):
 		return Reading.query.filter_by(sensor_id=sensorId).filter(
 			Reading.time.between(datetime.datetime.fromtimestamp(start),
