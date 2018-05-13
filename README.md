@@ -8,8 +8,10 @@ This is a basic flask server. To run locally, use the following commands:
  #setup the virtual environment
  pip install virtualenv
  virtualenv venv
+ pip install -r requirements.txt
+ 
+ #start the virtual environment
  source venv/bin/activate
- pip install flask
  export FLASK_APP=diffaltimetry.py
  
  #setup an empty db
