@@ -1,3 +1,4 @@
+import datetime
 from app import db
 from app import login
 from flask_login import UserMixin
@@ -70,6 +71,23 @@ class Reading(db.Model):
 				self.sample_count}
 
 	@staticmethod
+	def saveJson(jsonItem):
+		reading = Reading(sensor_id=jsonItem.get('sensor_id'),
+						  calibration=jsonItem.get('calibration'),
+						  time=datetime.datetime.fromtimestamp(jsonItem.get('time')),
+						  duration=jsonItem.get('duration'),
+						  lat=jsonItem.get('lat'),
+						  lon=jsonItem.get('lon'),
+						  lat_lon_sd=jsonItem.get('lat_lon_sd'),
+						  uncal_pressure=jsonItem.get('uncal_pressure'),
+						  uncal_pressure_sd=jsonItem.get('uncal_pressure_sd'),
+						  uncal_temperature=jsonItem.get('uncal_temperature'),
+						  uncal_temperature_sd=jsonItem.get('uncal_temperature_sd'),
+						  sample_count=jsonItem.get('sample_count'))
+		reading.save()
+		return reading
+
+	@staticmethod
 	def csv_headers(self):
 		return {'id','sensor_id',
 				'calibration','time','duration',
@@ -83,8 +101,14 @@ class Reading(db.Model):
 		return Reading.query.all()
 
 	@staticmethod
-	def get(sensorId, count):
+	def get_sensor(sensorId, count):
 		return Reading.query.filter_by(sensor_id=sensorId).order_by(Reading.time.desc()).limit(count).all()
+
+	@staticmethod
+	def get_sensor_range(sensorId, start, end):
+		return Reading.query.filter_by(sensor_id=sensorId).filter(
+			Reading.time.between(datetime.datetime.fromtimestamp(start),
+								 datetime.datetime.fromtimestamp(end)))
 
 
 class Sensor(db.Model):

@@ -98,25 +98,13 @@ def readings():
 		if len(jsonReq) > 0:
 			# ensure that sensor exists for these readings (assume one sensor/post)
 			sensor_id = jsonReq[0].get('sensor_id')
-			readingSensor = Sensor.get(sensor_id)
-			if readingSensor is None:
-				readingSensor = Sensor(sensor_id=sensor_id, fixed=False)
-				readingSensor.save()
+			reading_sensor = Sensor.get(sensor_id)
+			if reading_sensor is None:
+				reading_sensor = Sensor(sensor_id=sensor_id, fixed=False)
+				reading_sensor.save()
 			# create readings from json
 			for jsonItem in jsonReq:
-				reading = Reading(sensor_id=jsonItem.get('sensor_id'),
-								  calibration=jsonItem.get('calibration'),
-								  time=datetime.datetime.fromtimestamp(jsonItem.get('time')),
-								  duration=jsonItem.get('duration'),
-								  lat=jsonItem.get('lat'),
-								  lon=jsonItem.get('lon'),
-								  lat_lon_sd=jsonItem.get('lat_lon_sd'),
-								  uncal_pressure=jsonItem.get('uncal_pressure'),
-								  uncal_pressure_sd=jsonItem.get('uncal_pressure_sd'),
-								  uncal_temperature=jsonItem.get('uncal_temperature'),
-								  uncal_temperature_sd=jsonItem.get('uncal_temperature_sd'),
-								  sample_count=jsonItem.get('sample_count'))
-				reading.save()
+				Reading.saveJson(jsonItem)
 		# generate server response
 		response = jsonify(jsonReq)
 		response.status_code = 201  # Created
@@ -134,40 +122,41 @@ def readings():
 				sensor_ids = Sensor.get_all_ids()
 				filtered = []
 				for id in sensor_ids:
-					oneSensorsReadings = Reading.get(id.sensor_id, count)
+					oneSensorsReadings = Reading.get_sensor(id.sensor_id, count)
 					for r in oneSensorsReadings:
 						filtered.append(r)
-				response = jsonify([r.jsonify() for r in filtered])
-				response.status_code = 200  # Ok
-				return response
+				return createReadingsResponse(filtered)
 
 			# query contains sensor id & count
 			else:
 				# return count readings from sensor with given sensor_id
-				filtered = Reading.get(sid, count)
-				if not filtered:
-					response = jsonify({})
-					response.status_code = 204  # No Content
-					return response
-				else:
-					response = jsonify([r.jsonify() for r in filtered])
-					response.status_code = 200  # Ok
-					return response
-				pass
+				filtered = Reading.get_sensor(sid, count)
+				return createReadingsResponse(filtered)
 
 		# check if query contains sensor id, and start and end times
-		# elif sid != '':
-		# 	start = request.args.get('start_time', -1, type=int)
-		# 	end = request.args.get('end_time', -1, type=int)
-		# 	if (start != -1) and (end != -1):
-
-		# else:
+		elif sid != '':
+			start = request.args.get('start_time', -1, type=int)
+			end = request.args.get('end_time', -1, type=int)
+			if (start != -1) and (end != -1):
+				filtered = Reading.get_sensor_range(sid, start, end)
+				return createReadingsResponse(filtered)
 
 
 	# parameters are missing
 	response = jsonify({'error': 'Only the following queries are supported: count, sensor_id & count, sensor_id & start_time & end_time'})
 	response.status_code = 400  # Bad Request
 	return response
+
+def createReadingsResponse(readings):
+	if not readings:
+		response = jsonify({})
+		response.status_code = 204  # No Content
+		return response
+	else:
+		response = jsonify([r.jsonify() for r in readings])
+		response.status_code = 200  # Ok
+		return response
+	pass
 
 
 # @app.route('/points', methods=['GET', 'POST'])
