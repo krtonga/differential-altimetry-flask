@@ -1,9 +1,9 @@
 from flask import Flask
-from config import Config
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_login import LoginManager
-from logging.handlers import RotatingFileHandler
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+from config import Config
 
 app = Flask(__name__) # __name__ is a python var for the current module
 app.config.from_object(Config)
@@ -18,6 +18,9 @@ app.register_blueprint(auth_bp)
 
 from app.api import api_bp
 app.register_blueprint(api_bp)
+
+from app.web import web_bp
+app.register_blueprint(web_bp)
 
 # write logs to a file
 # if not app.debug:
@@ -34,4 +37,5 @@ app.register_blueprint(api_bp)
     # app.logger.info('DiffAltimetry startup')
 
 # must come at end as workaround for circular inputs
-from app import routes, models
+from app import models
+from app.web import routes

@@ -88,7 +88,7 @@ def readings():
 
 
 	# parameters are missing
-	response = jsonify({'error': 'Only the following queries are supported: count, sensor_id & count, sensor_id & start_time & end_time'})
+	response = jsonify({'error': 'Only the following queries are supported: count, sensor_id & count, start_time & end_time, sensor_id & start_time & end_time'})
 	response.status_code = 400  # Bad Request
 	return response
 

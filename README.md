@@ -18,7 +18,7 @@ This is a basic flask server. To run locally, use the following commands:
  python db_create.py
  
  #run on localhost
-python diffaltimetry.py
+ python diffaltimetry.py
 ```
  
 After updating database models don't forget to generate and run migration scripts:
@@ -30,7 +30,8 @@ After updating database models don't forget to generate and run migration script
 And write some tests while you're at it!
  ```bash
  # run existing tests with
- python test_api.py
+ python tests/test_api.py
+ python tests/test_auth.py
  ```
  
  
