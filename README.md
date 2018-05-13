@@ -6,7 +6,7 @@ This is the backend service used by the Differential Altimetry Android applicati
 This is a basic flask server. To run locally, use the following commands:
  ```bash
  #setup the virtual environment
- pip install virtualenv
+ pip3 install virtualenv
  virtualenv venv
  pip3 install -r requirements.txt
  
@@ -18,8 +18,8 @@ This is a basic flask server. To run locally, use the following commands:
  python db_create.py
  
  #run on localhost
- flask run
- ```
+python diffaltimetry.py
+```
  
 After updating database models don't forget to generate and run migration scripts:
  ```bash
