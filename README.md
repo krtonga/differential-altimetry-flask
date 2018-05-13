@@ -8,7 +8,7 @@ This is a basic flask server. To run locally, use the following commands:
  #setup the virtual environment
  pip install virtualenv
  virtualenv venv
- pip install -r requirements.txt
+ pip3 install -r requirements.txt
  
  #start the virtual environment
  source venv/bin/activate
