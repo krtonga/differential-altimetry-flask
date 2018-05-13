@@ -33,7 +33,22 @@ And write some tests while you're at it!
  python tests/test_api.py
  python tests/test_auth.py
  ```
- 
+
+## Cloud setup - testing changes
+At the moment there's a test instance running on diffalt.org. That's a Digital Ocean droplet running Ubuntu 16.04, with the Flask app being served via uWSGI behind an nginx reverse proxy.
+
+The diffalt.org server is running on the ```cloud``` branch of the Git repo. To test new changes, merge them into that branch, ssh into the server (diffalt@diffalt.org) with the password that you know if you have any business in there, and:
+
+- Navigate to /home/diffalt/differential-altimetry-flask
+- ```git pull``` to bring in the changes on the cloud branch, then:
+
+```
+sudo systemctl restart diffaltimetry.service 
+sudo systemctl restart nginx
+```
+
+Unless you've fucked something up, that'll restart the app with the new changes from the ```cloud``` branch of the Github. Test away.
+
  
 ### APPRECIATIONS:
 Thank you to [The Flask Mega-Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world) and the team.
