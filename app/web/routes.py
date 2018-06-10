@@ -4,6 +4,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app.web import web_bp
 from app.models import Sensor
 
+import csv
+
 
 @web_bp.route('/')
 @web_bp.route('/index')

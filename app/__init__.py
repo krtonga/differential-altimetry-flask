@@ -4,6 +4,36 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from config import Config
+# from logging.config import dictConfig
+# from flask import request
+# from flask.logging import default_handler
+
+# configure flask logs
+# dictConfig({
+# 'version': 1,
+#     'formatters': {'default': {
+#         'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+#     }},
+#     'handlers': {'wsgi': {
+#         'class': 'logging.StreamHandler',
+#         'stream': 'ext://flask.logging.wsgi_errors_stream',
+#         'formatter': 'default'
+#     }},
+#     'root': {
+#         'level': 'INFO',
+#         'handlers': ['wsgi']
+#     }
+# })
+# class RequestFormatter(logging.Formatter):
+#     def format(self, record):
+#         record.url = request.url
+#         record.remote_addr = request.remote_addr
+#         return super().format(record)
+# formatter = RequestFormatter('[%(asctime)s] %(remote_addr)s requested %(url)s\n'
+#     '%(levelname)s in %(module)s: %(message)s')
+# default_handler.setFormatter(formatter)
+# if not app.debug:
+#     app.logger.addHandler(default_handler)
 
 app = Flask(__name__) # __name__ is a python var for the current module
 app.config.from_object(Config)

@@ -2,11 +2,14 @@
 
 {% block content %}
 	<h1>Hello, {{ current_user.username }}!</h1>
+    <!--<form action="/download_sensors/" method="get">-->
+        <!--<button type="submit">Download CSV</button>-->
+    <!--</form>-->
 	{% for sensor in sensors %}
-	<a href="{{ url_for('web.sensor', id=sensor.sensor_id) }}" >
-        <div>
-            <p>Sensor {{ sensor.sensor_id }}: <b>{{ sensor.points.all() }}</b></p>
-        </div>
-    </a>
+        <a href="{{ url_for('web.sensor', id=sensor.sensor_id) }}" >
+            <div>
+                <p>Sensor {{ sensor.sensor_id }}: <b>{{ sensor.points.all() }}</b></p>
+            </div>
+        </a>
 	{% endfor %}
 {% endblock %}

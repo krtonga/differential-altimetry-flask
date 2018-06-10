@@ -26,11 +26,10 @@ def load_user(id):
 
 
 class Reading(db.Model):
-	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-	sensor_id = db.Column(db.String(64), db.ForeignKey('sensor.sensor_id'))
+	sensor_id = db.Column(db.String(64), db.ForeignKey('sensor.sensor_id'), primary_key=True)
+	time = db.Column(db.DateTime, primary_key=True)
 	calibration = db.Column(db.Boolean())
-	time = db.Column(db.DateTime)
-	duration = db.Column(db.Float())
+	height = db.Column(db.Float())
 	lat = db.Column(db.Float())
 	lon = db.Column(db.Float())
 	lat_lon_sd = db.Column(db.Float())
@@ -40,19 +39,20 @@ class Reading(db.Model):
 	uncal_temperature_sd = db.Column(db.Float())
 	sample_count = db.Column(db.Integer())
 
+	__table_args__ = (db.UniqueConstraint('sensor_id', 'time', name='sensor_time_uc'),)
+
 	def __repr__(self):
-		return '<Reading {}>'.format(self.id)
+		return '<Reading {}>'.format(self.sensor_id, self.time)
 
 	def save(self):
 		db.session.add(self)
 		db.session.commit()
 
 	def jsonify(self):
-		return {'id':self.id,
-				'sensor_id':self.sensor_id,
+		return {'sensor_id':self.sensor_id,
 				'calibration':self.calibration,
 				'time':self.time,
-				'duration':self.duration,
+				'height':self.height,
 				'lat': self.lat,
 				'lon':self.lon,
 				'lat_lon_sd':self.lat_lon_sd,
@@ -63,7 +63,7 @@ class Reading(db.Model):
 				'sample_count':self.sample_count}
 
 	def csvify(self):
-		return {self.id,self.sensor_id,
+		return {self.sensor_id,
 				self.calibration,self.time,self.duration,
 				self.lat,self.lon,self.lat_lon_sd,
 				self.uncal_pressure,self.uncal_pressure_sd,
@@ -72,10 +72,12 @@ class Reading(db.Model):
 
 	@staticmethod
 	def saveJson(jsonItem):
-		reading = Reading(sensor_id=jsonItem.get('sensor_id'),
+		s_id = jsonItem.get('sensor_id')
+		time = jsonItem.get('time')
+		reading = Reading(sensor_id=s_id,
 						  calibration=jsonItem.get('calibration'),
-						  time=datetime.datetime.fromtimestamp(jsonItem.get('time')),
-						  duration=jsonItem.get('duration'),
+						  time=datetime.datetime.fromtimestamp(time),
+						  height=jsonItem.get('height'),
 						  lat=jsonItem.get('lat'),
 						  lon=jsonItem.get('lon'),
 						  lat_lon_sd=jsonItem.get('lat_lon_sd'),
@@ -89,7 +91,7 @@ class Reading(db.Model):
 
 	@staticmethod
 	def csv_headers(self):
-		return {'id','sensor_id',
+		return {'sensor_id',
 				'calibration','time','duration',
 				'lat','lon','lat_lon_sd',
 				'uncal_pressure','uncal_pressure_sd',
@@ -114,6 +116,7 @@ class Reading(db.Model):
 		return Reading.query.filter_by(sensor_id=sensorId).filter(
 			Reading.time.between(datetime.datetime.fromtimestamp(start),
 								 datetime.datetime.fromtimestamp(end)))
+
 
 
 class Sensor(db.Model):
