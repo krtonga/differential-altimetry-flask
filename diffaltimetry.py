@@ -22,7 +22,8 @@ def setup_logging():
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    response = jsonify(e.message)
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    response = jsonify(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
     response.status_code = 500 # Internal Server Error
     return response
 

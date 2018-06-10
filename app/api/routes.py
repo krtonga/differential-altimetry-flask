@@ -3,7 +3,7 @@ import logging
 import traceback
 import sys
 from sqlalchemy import exc
-from flask import render_template, flash, redirect, url_for, request, jsonify
+from flask import request, jsonify
 from app.api import api_bp
 from app.models import Sensor, Reading
 
@@ -40,7 +40,9 @@ def readings():
     # print('REQUEST: ', request, request.args, request.data)
     if request.method == "POST":
         # read request
-        json_req = json.loads(request.data)
+        str_req = request.readall().decode('utf-8')
+        json_req = json.loads(str_req)
+        # json_req = json.loads(request.get_data(as_text=True))
         if len(json_req) > 0:
             # ensure that sensor exists for these readings (assume one sensor/post)
             sensor_id = json_req[0].get('sensor_id')
