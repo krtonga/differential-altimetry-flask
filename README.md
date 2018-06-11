@@ -49,6 +49,7 @@ sudo systemctl restart nginx
 
 Unless you've fucked something up, that'll restart the app with the new changes from the ```cloud``` branch of the Github. Test away.
 
+Something not working as expected? Logs can be found at `/var/log/syslog`
  
 ### APPRECIATIONS:
-Thank you to [The Flask Mega-Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world) and the team.
+Thank you to [The Flask Mega-Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world) and all the tall boys on the Diff-Alt team.
