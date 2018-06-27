@@ -8,7 +8,7 @@
 	{% for sensor in sensors %}
         <a href="{{ url_for('web.sensor', id=sensor.sensor_id) }}" >
             <div>
-                <p>Sensor {{ sensor.sensor_id }}: <b>{{ sensor.points.all() }}</b></p>
+                <p>Sensor {{ sensor.sensor_id }}: <b>{{ sensor.readings.all() }}</b></p>
             </div>
         </a>
 	{% endfor %}

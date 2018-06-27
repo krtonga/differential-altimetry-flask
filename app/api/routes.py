@@ -51,15 +51,22 @@ def readings():
                 reading_sensor = Sensor(sensor_id=sensor_id, fixed=False)
                 reading_sensor.save()
             # create readings from json
+            response = []
             for json_item in json_req:
+                success = True
                 try:
                     Reading.saveJson(json_item)
-                except exc.IntegrityError as e:
-                    # if this item is already in the remote db, just keep going
-                    exc_type, exc_value, exc_traceback = sys.exc_info()
-                    logging.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+                except:
+                    success = False
+                    # exc_type, exc_value, exc_traceback = sys.exc_info()
+                    # logging.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+                    continue
+                finally:
+                    # if this item was added to the remote db, add to the response
+                    if success:
+                        response.append(json_item)
         # generate server response
-        response = jsonify(json_req)
+        response = jsonify(response)
         response.status_code = 201  # Created
         return response
 

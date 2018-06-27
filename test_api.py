@@ -138,9 +138,18 @@ class ApiTestCase(unittest.TestCase):
 
     def test_should_not_enter_same_readings_twice(self):
         self.client.post('/readings', data=self.readings1)
+        total = self.client.get('/readings', query_string={'sensor_id': 'sensor1', 'count': 100})
+        self.assertEquals(len(json.loads(total.data)), 2)
+
         res = self.client.post('/readings', data=self.readings1)
 
-        self.assertEquals(res.status_code, 500)
+        # returned response should be created successfully with empty array
+        self.assertEquals(res.status_code, 201)
+        self.assertEquals(len(json.loads(res.data)), 0)
+
+        # only two items should be in the db
+        total = self.client.get('/readings', query_string={'sensor_id': 'sensor1', 'count': 100})
+        self.assertEquals(len(json.loads(total.data)), 2)
 
     def test_reading_post_should_handle_bytes(self):
         bytes = self.readings1.encode('utf-8')
