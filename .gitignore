@@ -5,3 +5,4 @@ app/__pycache__/
 .idea/
 *.pyc
 diffaltimetry.db
+uwsgi.log
