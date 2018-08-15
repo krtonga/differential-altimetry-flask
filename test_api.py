@@ -81,7 +81,6 @@ class ApiTestCase(unittest.TestCase):
         with app.app_context():
             db.create_all()
 
-
     def test_sensor_creation(self):
         res = self.client.post('/sensors', data=self.sensorFixed)
         self.assertEqual(res.status_code, 201)
@@ -135,7 +134,6 @@ class ApiTestCase(unittest.TestCase):
         self.assertEquals(res.data,
                           '[\n  {\n    "calibration": false, \n    "height": 0.95, \n    "lat": -7.918234, \n    "lat_lon_sd": 16.0, \n    "lon": -33.412812, \n    "sample_count": 100, \n    "sensor_id": "sensor1", \n    "time": "Sat, 17 Mar 2018 03:08:02 GMT", \n    "uncal_pressure": 103243.0, \n    "uncal_pressure_sd": 38.6, \n    "uncal_temprature": 290.24, \n    "uncal_temprature_sd": 1.3\n  }\n]\n')
 
-
     def test_should_not_enter_same_readings_twice(self):
         self.client.post('/readings', data=self.readings1)
         total = self.client.get('/readings', query_string={'sensor_id': 'sensor1', 'count': 100})
@@ -176,24 +174,23 @@ class ApiTestCase(unittest.TestCase):
         self.client.post('/readings', data=self.readings2)
 
         res = self.client.get('/readings', query_string={'sensor_id': 'sensor2',
-                                                         'start_time':'1521245281',
-                                                         'end_time':'1521245283'})
+                                                         'start_time': '1521245281',
+                                                         'end_time': '1521245283'})
         self.assertEquals(res.data,
-                         '[\n  {\n    "calibration": false, \n    "height": 0.98, \n    "lat": -7.918238, \n    "lat_lon_sd": 18.0, \n    "lon": -33.412818, \n    "sample_count": 100, \n    "sensor_id": "sensor2", \n    "time": "Sat, 17 Mar 2018 03:08:02 GMT", \n    "uncal_pressure": 103248.0, \n    "uncal_pressure_sd": 38.8, \n    "uncal_temprature": 290.28, \n    "uncal_temprature_sd": 1.8\n  }\n]\n')
+                          '[\n  {\n    "calibration": false, \n    "height": 0.98, \n    "lat": -7.918238, \n    "lat_lon_sd": 18.0, \n    "lon": -33.412818, \n    "sample_count": 100, \n    "sensor_id": "sensor2", \n    "time": "Sat, 17 Mar 2018 03:08:02 GMT", \n    "uncal_pressure": 103248.0, \n    "uncal_pressure_sd": 38.8, \n    "uncal_temprature": 290.28, \n    "uncal_temprature_sd": 1.8\n  }\n]\n')
 
     def test_reading_get_date_range(self):
         self.client.post('/readings', data=self.readings1)
         self.client.post('/readings', data=self.readings2)
 
-        res = self.client.get('/readings', query_string={'start_time':'1521245281',
-                                                         'end_time':'1521245283'})
+        res = self.client.get('/readings', query_string={'start_time': '1521245281',
+                                                         'end_time': '1521245283'})
         self.assertEquals(res.data,
-                         '[\n  {\n    "calibration": false, \n    "height": 0.95, \n    "lat": -7.918234, \n    "lat_lon_sd": 16.0, \n    "lon": -33.412812, \n    "sample_count": 100, \n    "sensor_id": "sensor1", \n    "time": "Sat, 17 Mar 2018 03:08:02 GMT", \n    "uncal_pressure": 103243.0, \n    "uncal_pressure_sd": 38.6, \n    "uncal_temprature": 290.24, \n    "uncal_temprature_sd": 1.3\n  }, \n  {\n    "calibration": false, \n    "height": 0.98, \n    "lat": -7.918238, \n    "lat_lon_sd": 18.0, \n    "lon": -33.412818, \n    "sample_count": 100, \n    "sensor_id": "sensor2", \n    "time": "Sat, 17 Mar 2018 03:08:02 GMT", \n    "uncal_pressure": 103248.0, \n    "uncal_pressure_sd": 38.8, \n    "uncal_temprature": 290.28, \n    "uncal_temprature_sd": 1.8\n  }\n]\n')
+                          '[\n  {\n    "calibration": false, \n    "height": 0.95, \n    "lat": -7.918234, \n    "lat_lon_sd": 16.0, \n    "lon": -33.412812, \n    "sample_count": 100, \n    "sensor_id": "sensor1", \n    "time": "Sat, 17 Mar 2018 03:08:02 GMT", \n    "uncal_pressure": 103243.0, \n    "uncal_pressure_sd": 38.6, \n    "uncal_temprature": 290.24, \n    "uncal_temprature_sd": 1.3\n  }, \n  {\n    "calibration": false, \n    "height": 0.98, \n    "lat": -7.918238, \n    "lat_lon_sd": 18.0, \n    "lon": -33.412818, \n    "sample_count": 100, \n    "sensor_id": "sensor2", \n    "time": "Sat, 17 Mar 2018 03:08:02 GMT", \n    "uncal_pressure": 103248.0, \n    "uncal_pressure_sd": 38.8, \n    "uncal_temprature": 290.28, \n    "uncal_temprature_sd": 1.8\n  }\n]\n')
 
     def test_reading_get_none(self):
         res = self.client.get('/readings', query_string={'sensor_id': 'sensor2', 'count': 1})
         self.assertEquals(res.status_code, 204)
-
 
     def tearDown(self):
         with app.app_context():
