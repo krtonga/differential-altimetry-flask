@@ -1,4 +1,5 @@
 import json
+import calendar
 from datetime import datetime
 from app import db
 from app import login
@@ -67,11 +68,10 @@ class Reading(db.Model):
     #             'uncal_temperature', 'uncal_temperature_sd',
     #             'sample_count']
 
-    @staticmethod
     def to_json(self):
         return {'sensor_id': self.sensor_id,
                 'calibration': self.calibration,
-                'time': self.time,
+                'time': self.time, # TODO convert back
                 'height': self.height,
                 'lat': self.lat,
                 'lon': self.lon,
@@ -106,8 +106,9 @@ class Reading(db.Model):
         json_req = json.loads(str_req)
 
         if len(json_req) > 0:
-            Reading.save_readings(
+            result = Reading.save_readings(
                 Reading.from_json(reading) for reading in json_req)
+            return [Reading.to_json(r) for r in result]
         else:
             return []
 
@@ -123,10 +124,12 @@ class Reading(db.Model):
                 result = []
                 for reading in readings:
                     saved = Reading.add_or_update_reading(reading)
-                    result.append(saved)
+                    if saved:
+                        result.append(saved)
             else:
-                result = db.session.add(Sensor(sensor_id=sensor_id, readings=readings))
+                db.session.add(Sensor(sensor_id=sensor_id, readings=readings))
                 db.session.commit()
+                result.extend(readings)
         return result
 
     @staticmethod
@@ -134,6 +137,8 @@ class Reading(db.Model):
         entry = Reading.get(reading)
         if entry is None:
             result = db.session.add(reading)
+            db.session.commit()
+            return reading
         else:
             entry.calibration = reading.calibration
             entry.height = reading.height
@@ -145,9 +150,8 @@ class Reading(db.Model):
             entry.uncal_temperature = reading.uncal_temperature
             entry.uncal_temperature_sd = reading.uncal_temperature_sd
             entry.sample_count = reading.sample_count
-            result = reading
-        db.session.commit()
-        return result
+            db.session.commit()
+            return None
 
     @staticmethod
     def get(reading):
@@ -195,17 +199,16 @@ class Sensor(db.Model):
     # def csv_headers(self):
     #     return ['sensor_id', 'fixed', 'latitude', 'longitude', 'elevation']
 
-    @staticmethod
-    def to_json(sensor):
-        if sensor.fixed:
-            return {'sensor_id': sensor.sensor_id,
-                    'fixed': sensor.fixed,
-                    'lat': sensor.lat,
-                    'lon': sensor.lon,
-                    'alt': sensor.alt}
+    def to_json(self):
+        if self.fixed:
+            return {'sensor_id': self.sensor_id,
+                    'fixed': self.fixed,
+                    'lat': self.lat,
+                    'lon': self.lon,
+                    'alt': self.alt}
         else:
-            return {'sensor_id': sensor.sensor_id,
-                    'fixed': sensor.fixed}
+            return {'sensor_id': self.sensor_id,
+                    'fixed': self.fixed}
 
     @staticmethod
     def from_json(json_sensor):
@@ -219,6 +222,8 @@ class Sensor(db.Model):
         if (sensor_id and fixed and lat and lon and alt) or (sensor_id and not fixed):
             return Sensor(sensor_id=sensor_id, fixed=fixed, lat=lat, lon=lon, alt=alt)
 
+        #TODO throw exception
+
     @staticmethod
     def save_sensor_from_json(request):
         str_req = request.data.decode('utf-8')
@@ -230,16 +235,17 @@ class Sensor(db.Model):
     def add_or_update_sensor(sensor):
         if sensor is None:
             return None
+        #TODO throw exception
         entry = Sensor.get(sensor.sensor_id)
         if entry is None:
-            entry = db.session.add(sensor)
+            db.session.add(sensor)
         else:
             entry.fixed = sensor.fixed
             entry.lat = sensor.lat
             entry.lon = sensor.lon
             entry.alt = sensor.alt
         db.session.commit()
-        return entry
+        return sensor
 
     @staticmethod
     def get(sensor_id):
