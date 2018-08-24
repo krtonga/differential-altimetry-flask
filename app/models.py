@@ -69,9 +69,11 @@ class Reading(db.Model):
     #             'sample_count']
 
     def to_json(self):
+        time = (self.time - datetime(1970, 1, 1)).total_seconds()  # converts to seconds since epoch
+        # print(time)
         return {'sensor_id': self.sensor_id,
                 'calibration': self.calibration,
-                'time': self.time, # TODO convert back
+                'time': time,
                 'height': self.height,
                 'lat': self.lat,
                 'lon': self.lon,
@@ -222,7 +224,7 @@ class Sensor(db.Model):
         if (sensor_id and fixed and lat and lon and alt) or (sensor_id and not fixed):
             return Sensor(sensor_id=sensor_id, fixed=fixed, lat=lat, lon=lon, alt=alt)
 
-        #TODO throw exception
+        # TODO throw exception
 
     @staticmethod
     def save_sensor_from_json(request):
@@ -235,7 +237,7 @@ class Sensor(db.Model):
     def add_or_update_sensor(sensor):
         if sensor is None:
             return None
-        #TODO throw exception
+        # TODO throw exception
         entry = Sensor.get(sensor.sensor_id)
         if entry is None:
             db.session.add(sensor)
@@ -272,7 +274,6 @@ class Point(db.Model):
 
     def __repr__(self):
         return '<Point {}>'.format(self.id)
-
 
 # def add_point(point):
 #     s_id = point.sensor_id
