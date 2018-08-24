@@ -12,12 +12,10 @@ from app.models import Sensor, Reading
 def sensors():
     logging.info('/sensors. method=%s. data=%s',request.method, request.data)
     if request.method == "POST":
-        # read info from request
-        jsonReq = json.loads(request.data)
-        savedSensor = Sensor.saveJson(jsonReq)
-
-        if savedSensor:
-            response = jsonify(savedSensor.jsonify())
+        saved_sensor = Sensor.save_sensor_from_json(request)
+        if saved_sensor:
+            response = jsonify(Sensor.to_json(saved_sensor))
+            # response = jsonify(Sensor.to_json(s) for s in saved_sensors)
             response.status_code = 201 # Created
         else:
             response = jsonify({'error':'Sensor missing required fields. '
@@ -29,7 +27,7 @@ def sensors():
     # GET
     else:
         sensors = Sensor.get_all()
-        response = jsonify([s.jsonify() for s in sensors])
+        response = jsonify([Sensor.to_json(s) for s in sensors])
         response.status_code = 200 # Ok
 
     return response
@@ -39,34 +37,10 @@ def sensors():
 def readings():
     # print('REQUEST: ', request, request.args, request.data)
     if request.method == "POST":
-        # read request
-        str_req = request.data.decode('utf-8')
-        json_req = json.loads(str_req)
-        # json_req = json.loads(request.get_data(as_text=True))
-        if len(json_req) > 0:
-            # ensure that sensor exists for these readings (assume one sensor/post)
-            sensor_id = json_req[0].get('sensor_id')
-            reading_sensor = Sensor.get(sensor_id)
-            if reading_sensor is None:
-                reading_sensor = Sensor(sensor_id=sensor_id, fixed=False)
-                reading_sensor.save()
-            # create readings from json
-            response = []
-            for json_item in json_req:
-                success = True
-                try:
-                    Reading.saveJson(json_item)
-                except:
-                    success = False
-                    # exc_type, exc_value, exc_traceback = sys.exc_info()
-                    # logging.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
-                    continue
-                finally:
-                    # if this item was added to the remote db, add to the response
-                    if success:
-                        response.append(json_item)
+        result = Reading.save_readings_from_json(request)
+
         # generate server response
-        response = jsonify(response)
+        response = jsonify(result)
         response.status_code = 201  # Created
         return response
 
@@ -82,7 +56,7 @@ def readings():
                 sensor_ids = Sensor.get_all_ids()
                 filtered = []
                 for id in sensor_ids:
-                    one_sensors_readings = Reading.get_sensor(id.sensor_id, count)
+                    one_sensors_readings = Reading.get_for_sensor(id.sensor_id, count)
                     for r in one_sensors_readings:
                         filtered.append(r)
                 return create_readings_response(filtered)
@@ -90,7 +64,7 @@ def readings():
             # query contains sensor id & count
             else:
                 # return count readings from sensor with given sensor_id
-                filtered = Reading.get_sensor(sid, count)
+                filtered = Reading.get_for_sensor(sid, count)
                 return create_readings_response(filtered)
 
         # check if query contains sensor id, and start and end times
@@ -117,7 +91,7 @@ def create_readings_response(readings):
         response.status_code = 204  # No Content
         return response
     else:
-        response = jsonify([r.jsonify() for r in readings])
+        response = jsonify([Reading.to_json(r) for r in readings])
         response.status_code = 200  # Ok
         return response
     pass
