@@ -1,15 +1,115 @@
 {% extends "base.html" %}
 
 {% block content %}
-	<h1>Hello, {{ current_user.username }}!</h1>
-    <!--<form action="/download_sensors/" method="get">-->
-        <!--<button type="submit">Download CSV</button>-->
-    <!--</form>-->
+<div class="container">
+
+    <canvas id="readingsCount"></canvas>
+
 	{% for sensor in sensors %}
-        <a href="{{ url_for('web.sensor', id=sensor.sensor_id) }}" >
-            <div>
-                <p>Sensor {{ sensor.sensor_id }}: <b>{{ sensor.readings.all() }}</b></p>
-            </div>
-        </a>
+        <div>
+            <h2>Sensor {{ sensor.sensor_id }}:</h2>
+            <p>Reading Count: {{ sensor.readings.all()|length }}</p>
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">TIME</th>
+                    <th scope="col">PRESSURE</th>
+                    <th scope="col">PRES_SD</th>
+                    <th scope="col">TEMP</th>
+                    <th scope="col">TEMP_SD</th>
+                    <th scope="col">LAT</th>
+                    <th scope="col">LON</th>
+                    <th scope="col">LAT_LON_SD</th>
+                    <th scope="col">SAMPLE_COUNT</th>
+                    <th scope="col">HEIGHT</th>
+                    <th scope="col">CALIBRATION</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for reading in sensor.readings.all() %}
+                <tr>
+                    <th scope="row">{{reading.time}}</th>
+                    <th scope="row">{{reading.uncal_pressure}}</th>
+                    <th scope="row">{{reading.uncal_pressure_sd}}</th>
+                    <th scope="row">{{reading.uncal_temperature}}</th>
+                    <th scope="row">{{reading.uncal_temperature_sd}}</th>
+                    <th scope="row">{{reading.lat}}</th>
+                    <th scope="row">{{reading.lon}}</th>
+                    <th scope="row">{{reading.lat_lon_sd}}</th>
+                    <th scope="row">{{reading.sample_count}}</th>
+                    <th scope="row">{{reading.height}}</th>
+                    <th scope="row">{% if reading.calibration %}T{% endif %}</th>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 	{% endfor %}
+    </div>
+
+    <!--TODO: Display more interesting data - http://www.chartjs.org/docs/latest/getting-started/-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script>
+        var ctx = document.getElementById('readingsCount').getContext('2d');
+        var chart = new Chart(ctx, {
+            // The type of chart we want to create
+            type: 'line',
+
+            // The data for our dataset
+            data: {
+                labels: [{% for sensor in sensors %}{{sensor.id}},{% endfor %}],
+                datasets: [{
+                    label: "Reading Count per sensor",
+                    backgroundColor: 'rgb(255, 99, 132)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    data: [{% for sensor in sensors %}{{sensor.readings.all()|length}},{% endfor %}],
+                }]
+            },
+
+            // Configuration options go here
+            options: {}
+        });
+    </script>
+
+<!--TODO ADD MAP. See: https://www.mapbox.com/help/marker-playground/ -->
+  <!--<div id="map" "color:blue;height:300px;">I See you</div>-->
+
+    <!--<script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js"></script>-->
+    <!--<link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css" rel="stylesheet" />-->
+    <!--<script>-->
+        <!--mapboxgl.accessToken = "pk.eyJ1Ijoia3J0b25nYSIsImEiOiJjamxjNmNibG0xbHpxM3BxaDg1bXFlZmRhIn0.IvB6M_eABeCtEwps25YBzA";-->
+
+<!--/* Map: This represents the map on the page. */-->
+<!--var map = new mapboxgl.Map({-->
+  <!--container: "map",-->
+  <!--style: "mapbox://styles/mapbox/dark-v9",-->
+  <!--zoom:5,-->
+  <!--center: [-77.039679,38.897435]-->
+<!--});-->
+
+<!--map.on("load", function () {-->
+  <!--/* Image: An image is loaded and added to the map. */-->
+  <!--map.loadImage("https://i.imgur.com/MK4NUzI.png", function(error, image) {-->
+      <!--if (error) throw error;-->
+      <!--map.addImage("custom-marker", image);-->
+      <!--/* Style layer: A style layer ties together the source and image and specifies how they are displayed on the map. */-->
+      <!--map.addLayer({-->
+        <!--id: "markers",-->
+        <!--type: "symbol",-->
+        <!--/* Source: A data source specifies the geographic coordinate where the image marker gets placed. */-->
+        <!--source: {-->
+          <!--type: "geojson",-->
+          <!--data: {-->
+            <!--type: "FeatureCollection",-->
+            <!--features:[{"type":"Feature","geometry":{"type":"Point","coordinates":["-6.7713358","39.2400339"]}}]}-->
+        <!--},-->
+        <!--layout: {-->
+          <!--"icon-image": "custom-marker",-->
+        <!--}-->
+      <!--});-->
+    <!--});-->
+<!--});-->
+    <!--</script>-->
 {% endblock %}

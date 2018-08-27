@@ -1,22 +1,29 @@
-<html>
-	<head>
-		{% if title %}
-		<title>Differential Altimetry - {{ title }}</title>
-		{% else %}
-		<title>Welcome to Differential Altimetry</title>
-		{% endif %}
-	</head>
-	<body>
-		<div>
-			MENU: <a href="{{ url_for('web.index') }}">Home</a>,
-            {% if current_user.is_anonymous %}
-            <a href="{{ url_for('auth.login') }}">Login</a>
-            {% else %}
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
-            {% endif %}
-		</div>
-		<hr>
-		{% with messages = get_flashed_messages() %}
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+    {% if title %}Differential Altimetry - {{ title }}
+    {% else %}Welcome to Differential Altimetry{% endif %}
+{% endblock%}
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">-->
+            <!--<span class="navbar-toggler-icon"></span>-->
+        <!--</button>-->
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="{{ url_for('web.index') }}">Home <span class="sr-only">(current)</span></a>
+                {% if current_user.is_anonymous %}
+                    <a class="nav-item nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                {% else %}
+                    <a href="{{ url_for('auth.logout') }}">Logout</a>
+                {% endif %}
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul>
             {% for message in messages %}
@@ -25,6 +32,6 @@
         </ul>
         {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
-	</body>
-</html>
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}

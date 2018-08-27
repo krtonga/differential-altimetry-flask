@@ -2,6 +2,7 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_bootstrap import Bootstrap
 
 from config import Config
 # from logging.config import dictConfig
@@ -41,6 +42,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
+bootstrap = Bootstrap(app)
 
 # import of bps must come after app and db are defined
 from app.auth import auth_bp
